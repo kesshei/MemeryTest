@@ -1,5 +1,8 @@
-﻿using System.Net;
+﻿using Masuit.Tools.Systems;
+using System.IO;
+using System.Net;
 using System.Runtime.InteropServices;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace MemeryTest
 {
@@ -7,43 +10,45 @@ namespace MemeryTest
     {
         static void Main(string[] args)
         {
-            Test2();
+            //Test2();
+            Test3();
             Console.WriteLine("测试成功!");
             Console.ReadLine();
         }
-public static void Test0()
-{
-    Double[] values = GetData();
-    // Compute mean.
-    Console.WriteLine("Sample mean: {0}, N = {1}",
-                        GetMean(values), values.Length);
 
-    static Double[] GetData()
-    {
-        var d = 0x7FFFFFC7;
-        Random rnd = new Random();
-        List<Double> values = new List<Double>();
-        for (int ctr = 1; ctr <= int.MaxValue; ctr++)
+        public static void Test0()
         {
-            values.Add(rnd.NextDouble());
-            if (ctr % 10000000 == 0)
+            Double[] values = GetData();
+            // Compute mean.
+            Console.WriteLine("Sample mean: {0}, N = {1}",
+                                GetMean(values), values.Length);
+
+            static Double[] GetData()
             {
-                var memSize = ((long)values.Count * 8) / 1024 / 1024 / 1024;
-                Console.WriteLine($"Retrieved {ctr} items limit:{d} out:{ctr >= d} {(long)values.Count / 1024 / 1024 / 1024}GB个 of data .{memSize} GB");
+                var d = 0x7FFFFFC7;
+                Random rnd = new Random();
+                List<Double> values = new List<Double>();
+                for (int ctr = 1; ctr <= int.MaxValue; ctr++)
+                {
+                    values.Add(rnd.NextDouble());
+                    if (ctr % 10000000 == 0)
+                    {
+                        var memSize = ((long)values.Count * 8) / 1024 / 1024 / 1024;
+                        Console.WriteLine($"Retrieved {ctr} items limit:{d} out:{ctr >= d} {(long)values.Count / 1024 / 1024 / 1024}GB个 of data .{memSize} GB");
+                    }
+                }
+                return values.ToArray();
+            }
+
+            static Double GetMean(Double[] values)
+            {
+                Double sum = 0;
+                foreach (var value in values)
+                    sum += value;
+
+                return sum / values.Length;
             }
         }
-        return values.ToArray();
-    }
-
-    static Double GetMean(Double[] values)
-    {
-        Double sum = 0;
-        foreach (var value in values)
-            sum += value;
-
-        return sum / values.Length;
-    }
-}
         public static void Test1()
         {
             IntPtr ptr = IntPtr.Zero;
@@ -69,35 +74,52 @@ public static void Test0()
                 Marshal.FreeHGlobal(ptr);
             }
         }
-public static void Test2()
-{
-    var list = new List<IntPtr>();
-    try
-    {
-        for (int i = 0; i < 8; i++)
+        public static void Test2()
         {
-            var ptr = Marshal.AllocHGlobal(int.MaxValue);//默认最大2G申请，单个方法
-            list.Add(ptr);
-            for (int j = 0; j < int.MaxValue; j++)
+            var list = new List<IntPtr>();
+            try
             {
-                Marshal.WriteByte(ptr, j, (byte)(66 + i));
+                for (int i = 0; i < 8; i++)
+                {
+                    var ptr = Marshal.AllocHGlobal(int.MaxValue);//默认最大2G申请，单个方法
+                    list.Add(ptr);
+                    for (int j = 0; j < int.MaxValue; j++)
+                    {
+                        Marshal.WriteByte(ptr, j, (byte)(66 + i));
+                    }
+                    Console.WriteLine($"写入成功{i}");
+                }
+                Console.WriteLine("申请完成");
+                Console.ReadLine();
             }
-            Console.WriteLine($"写入成功{i}");
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            finally
+            {
+                foreach (var item in list)
+                {
+                    Marshal.FreeHGlobal(item);
+                }
+            }
         }
-        Console.WriteLine("申请完成");
-        Console.ReadLine();
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine(ex.Message);
-    }
-    finally
-    {
-        foreach (var item in list)
+        public static void Test3()
         {
-            Marshal.FreeHGlobal(item);
+            using var largeMemoryStream = new LargeMemoryStream();
+            var d = 0x7FFFFFC7;
+            Random rnd = new Random();
+            for (int ctr = 1; ctr <= int.MaxValue; ctr++)
+            {
+                var value = rnd.NextDouble();
+                byte[] binary = BitConverter.GetBytes(value);
+                largeMemoryStream.Write(binary, 0, binary.Length);
+                if (ctr % 10000000 == 0)
+                {
+                    var memSize = largeMemoryStream.Position;
+                    Console.WriteLine($"Retrieved {ctr} items limit:{d} out:{ctr >= d} {(long)ctr / 1024 / 1024 / 1024}GB个 of data .{memSize} GB");
+                }
+            }
         }
-    }
-}
     }
 }
