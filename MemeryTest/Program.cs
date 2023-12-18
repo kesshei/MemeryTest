@@ -1,5 +1,4 @@
-﻿using Masuit.Tools.Systems;
-using System.IO;
+﻿using System.IO;
 using System.Net;
 using System.Runtime.InteropServices;
 using static System.Net.Mime.MediaTypeNames;
@@ -10,8 +9,7 @@ namespace MemeryTest
     {
         static void Main(string[] args)
         {
-            //Test2();
-            Test3();
+            Test2();
             Console.WriteLine("测试成功!");
             Console.ReadLine();
         }
@@ -104,22 +102,22 @@ namespace MemeryTest
                 }
             }
         }
-        public static void Test3()
-        {
-            using var largeMemoryStream = new LargeMemoryStream();
-            var d = 0x7FFFFFC7;
-            Random rnd = new Random();
-            for (int ctr = 1; ctr <= int.MaxValue; ctr++)
-            {
-                var value = rnd.NextDouble();
-                byte[] binary = BitConverter.GetBytes(value);
-                largeMemoryStream.Write(binary, 0, binary.Length);
-                if (ctr % 10000000 == 0)
-                {
-                    var memSize = largeMemoryStream.Position;
-                    Console.WriteLine($"Retrieved {ctr} items limit:{d} out:{ctr >= d} {(long)ctr / 1024 / 1024 / 1024}GB个 of data .{memSize} GB");
-                }
-            }
-        }
+        //public static void Test3()
+        //{
+        //    using var largeMemoryStream = new LargeMemoryStream();
+        //    var d = 0x7FFFFFC7;
+        //    Random rnd = new Random();
+        //    for (int ctr = 1; ctr <= int.MaxValue; ctr++)
+        //    {
+        //        var value = rnd.NextDouble();
+        //        byte[] binary = BitConverter.GetBytes(value);
+        //        largeMemoryStream.Write(binary, 0, binary.Length);
+        //        if (ctr % 10000000 == 0)
+        //        {
+        //            var memSize = largeMemoryStream.Position/1024/1024/1024;
+        //            Console.WriteLine($"Retrieved {ctr} items limit:{d} out:{ctr >= d} {(long)ctr / 1024 / 1024 / 1024}GB个 of data .{memSize} GB");
+        //        }
+        //    }
+        //}
     }
 }

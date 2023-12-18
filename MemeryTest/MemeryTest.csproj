@@ -9,8 +9,4 @@
     <Platforms>AnyCPU;x64;x86</Platforms>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Masuit.Tools.Core" Version="2.6.8.4" />
-  </ItemGroup>
-
 </Project>
